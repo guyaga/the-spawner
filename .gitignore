@@ -1,0 +1,11 @@
+# Claude config backups (never commit your config or its backups)
+*.claude.json.bak
+.claude.json
+.claude.json.bak
+
+# Spawner launcher scripts written into spawned project folders
+_spawner-launch.ps1
+
+# OS noise
+Thumbs.db
+.DS_Store
