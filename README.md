@@ -47,6 +47,36 @@ These are the non-obvious things that make a "just launch claude" approach fail
   If `ANTHROPIC_API_KEY` is set, Claude Code uses it and **disables** Remote
   Control. The launcher unsets it for the spawned process only.
 
+## Optional flags
+
+The default behavior above is unchanged. These flags are all opt-in:
+
+| Flag | Mode | What it adds |
+|------|------|--------------|
+| `-Here` | current dir | Run in the **current directory** (or `$env:SPAWNER_HERE`) instead of a new folder, so the session inherits that project's existing `CLAUDE.md` / hooks. No folder is created and no trust pre-seed is needed. |
+| `-Brief "<text>"` | either | **Spawn-and-go:** the session boots already executing an inline task brief (saved under `~/.claude/spawner-briefs`). |
+| `-BriefFile <path>` | either | Same, but reads the brief from a file. |
+| `-InitRepo` | new folder | After creating the folder, `git init` + commit and `gh repo create --source=. --push`. **Private by default.** |
+| `-Public` | new folder | With `-InitRepo`, create a public repo instead of private. |
+
+```powershell
+# default: fresh folder, remote session
+/spawner my-idea
+
+# run in the current project instead of a new folder
+... spawn.ps1 -Here -Name review-this
+
+# boot already running a task
+... spawn.ps1 -Name nightly -Brief "Refactor the parser and add tests; done = green CI."
+
+# fresh folder + a private GitHub repo pushed
+... spawn.ps1 -Name my-idea -InitRepo
+```
+
+`-InitRepo` needs `git` and an authenticated `gh` CLI. If either is missing or
+the repo name is taken, the repo step is skipped with a note and the folder +
+session still launch.
+
 ## Requirements
 
 - **Claude Code v2.1.51+**
@@ -55,6 +85,7 @@ These are the non-obvious things that make a "just launch claude" approach fail
 - **Windows** + PowerShell (Windows PowerShell 5.1 or PowerShell 7)
 - Optional: [Windows Terminal](https://aka.ms/terminal) (`wt`) for a nicer
   window; otherwise a plain console is used
+- Optional (for `-InitRepo`): `git` + an authenticated [`gh`](https://cli.github.com) CLI
 
 ## Install
 
@@ -100,6 +131,9 @@ To always create projects on, say, your `D:` drive:
 setx SPAWNER_PARENT "D:\"
 ```
 
+The directory used by `-Here` can be overridden with `SPAWNER_HERE` (default: the
+current directory).
+
 ## Files
 
 | File | Purpose |
@@ -115,6 +149,9 @@ setx SPAWNER_PARENT "D:\"
 - `--dangerously-skip-permissions` is used so the remote session isn't blocked
   waiting for permission prompts you can't answer from the phone. Only spawn
   projects you trust.
+- `-InitRepo` creates a repo under your authenticated `gh` account and pushes to
+  GitHub. It is opt-in and private by default; nothing is created or pushed
+  without it.
 
 ## License
 
